@@ -1,0 +1,93 @@
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/pagination/macro.njk" import govukPagination %}
+
+{% extends "template.njk" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <h1 class="govuk-heading-xl">Tasks</h1>
+
+      {% if deleted %}
+        {{ govukNotificationBanner({
+          type: "success",
+          titleText: "Success",
+          html: "Task deleted."
+        }) }}
+      {% endif %}
+
+      {% if error %}
+        <div class="govuk-error-summary" role="alert" aria-labelledby="error-summary-title" tabindex="-1">
+          <h2 class="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+          <div class="govuk-error-summary__body">
+            <p class="govuk-body">{{ error }}</p>
+          </div>
+        </div>
+      {% endif %}
+
+      <p class="govuk-body">
+        {{ govukButton({
+          text: "Create a new task",
+          href: "/tasks/new",
+          isStartButton: true
+        }) }}
+      </p>
+
+      {% if totalItems > 0 %}
+        <p class="govuk-body">
+          {% if totalItems == 1 %}
+            Showing 1 task
+          {% else %}
+            Showing {{ from }} to {{ to }} of {{ totalItems }} tasks
+            {% if totalPages > 1 %}
+              (page {{ page }} of {{ totalPages }})
+            {% endif %}
+          {% endif %}
+        </p>
+      {% endif %}
+
+      {% if tasks.length %}
+        <table class="govuk-table">
+          <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+              <th scope="col" class="govuk-table__header">Title</th>
+              <th scope="col" class="govuk-table__header">Status</th>
+              <th scope="col" class="govuk-table__header">Due</th>
+              <th scope="col" class="govuk-table__header govuk-table__header--numeric">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="govuk-table__body">
+            {% for task in tasks %}
+              <tr class="govuk-table__row">
+                <td class="govuk-table__cell">
+                  <a href="/tasks/{{ task.id }}" class="govuk-link">{{ task.title }}</a>
+                  {% if task.description %}
+                    <br>
+                    <span class="govuk-body-s govuk-!-margin-top-1">{{ task.description }}</span>
+                  {% endif %}
+                </td>
+                <td class="govuk-table__cell">
+                  <strong class="govuk-tag {{ task.statusTagClass }}">{{ task.statusLabel }}</strong>
+                </td>
+                <td class="govuk-table__cell">{{ task.dueDateFormatted }}</td>
+                <td class="govuk-table__cell govuk-table__cell--numeric">
+                  <a href="/tasks/{{ task.id }}" class="govuk-link">View</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% if pagination %}
+          {{ govukPagination(pagination) }}
+        {% endif %}
+      {% elif not error and totalItems == 0 %}
+        {{ govukInsetText({
+          text: "No tasks yet. Create your first task to get started."
+        }) }}
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

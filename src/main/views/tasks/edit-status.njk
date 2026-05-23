@@ -1,0 +1,54 @@
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% extends "template.njk" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-xl">Task: {{ task.title }}</span>
+      <h1 class="govuk-heading-xl">Update status</h1>
+
+      {{ govukInsetText({
+        text: "Due " + task.dueDateFormatted
+      }) }}
+
+      {% if error %}
+        <div class="govuk-error-summary" role="alert" aria-labelledby="error-summary-title" tabindex="-1">
+          <h2 class="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+          <div class="govuk-error-summary__body">
+            <p class="govuk-body">{{ error }}</p>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if fieldErrors %}
+        <div class="govuk-error-summary" role="alert" aria-labelledby="field-error-summary-title" tabindex="-1">
+          <h2 class="govuk-error-summary__title" id="field-error-summary-title">There is a problem</h2>
+          <div class="govuk-error-summary__body">
+            <ul class="govuk-list govuk-error-summary__list">
+              {% for field, message in fieldErrors %}
+                <li><a href="#{{ field }}">{{ message }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="post" action="/tasks/{{ task.id }}/edit-status" novalidate>
+        {{ govukSelect({
+          id: "status",
+          name: "status",
+          label: { text: "Status" },
+          items: statuses,
+          value: task.status,
+          errorMessage: { text: fieldErrors.status } if fieldErrors and fieldErrors.status
+        }) }}
+
+        {{ govukButton({ text: "Save status" }) }}
+        <a href="/tasks/{{ task.id }}" class="govuk-link govuk-!-margin-left-3">Cancel</a>
+      </form>
+    </div>
+  </div>
+{% endblock %}
